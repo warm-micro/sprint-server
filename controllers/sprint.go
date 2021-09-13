@@ -94,3 +94,20 @@ func CheckSprint(c *gin.Context) {
 		"body":    check,
 	})
 }
+
+func DeleteSprint(c *gin.Context) {
+	sprintId := c.Param("sprintId")
+	var sprint db.Sprint
+	if err := db.DB.Where("ID = ?", sprintId).First(&sprint).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "wrong sprint Id",
+			"body":    sprintId,
+		})
+		return
+	}
+	db.DB.Delete(&sprint)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "sprint deleted",
+		"body":    sprint,
+	})
+}
