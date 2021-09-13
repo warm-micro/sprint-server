@@ -4,6 +4,6 @@ import "gorm.io/gorm"
 
 type Sprint struct {
 	gorm.Model
-	Name        string
-	WorkspaceId uint
+	Name        string `form:"name"`
+	WorkspaceId uint   `form:"workspaceId"`
 }

@@ -7,6 +7,7 @@ import (
 )
 
 func AddSpringRouter(router *gin.RouterGroup) {
-	router.POST("", controllers.CreateSprint)
+	router.POST("/", controllers.CreateSprint)
 	router.GET("", controllers.ListSprint)
+	router.GET("/check", controllers.CheckSprint)
 }
