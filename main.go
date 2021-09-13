@@ -1,8 +1,18 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"wm/sprint/db"
+	"wm/sprint/routers"
+
+	"github.com/gin-gonic/gin"
+)
+
+func init() {
+	db.Connect()
+}
 
 func main() {
 	r := gin.Default()
-	r.Run("50052")
+	routers.SetUpRouter(r)
+	r.Run(":50052")
 }
