@@ -65,7 +65,7 @@ func ListSprint(c *gin.Context) {
 		return
 	}
 	var sprints []db.Sprint
-	db.DB.Where("workspaceId = ?", workspaceId).Find(&sprints)
+	db.DB.Where("Workspace_id = ?", workspaceId).Find(&sprints)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "list sprint",
