@@ -22,11 +22,13 @@ func Logger() gin.HandlerFunc {
 		latency := time.Since(t)
 		status := c.Writer.Status()
 		path := c.FullPath()
+		method := c.Request.Method
 
 		data := url.Values{
 			"api":     {path},
 			"status":  {strconv.Itoa(status)},
 			"latency": {latency.String()},
+			"method":  {method},
 		}
 
 		resp, err := http.PostForm(config.LOGGER_SERVICE+"/log", data)
