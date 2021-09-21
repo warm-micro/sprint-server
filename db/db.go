@@ -18,6 +18,5 @@ func Connect() {
 		log.Fatal(err)
 	}
 	DB = db
-
 	db.AutoMigrate(&Sprint{})
 }

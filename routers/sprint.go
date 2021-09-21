@@ -11,4 +11,6 @@ func AddSpringRouter(router *gin.RouterGroup) {
 	router.GET("", controllers.ListSprint)
 	router.DELETE("/:sprintId", controllers.DeleteSprint)
 	router.GET("/check", controllers.CheckSprint)
+	router.PUT("/status/:sprintId", controllers.ChangeStatus)
+	router.POST("/swap", controllers.ChangeOrder)
 }

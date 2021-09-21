@@ -21,6 +21,13 @@ func CreateSprint(c *gin.Context) {
 		})
 		return
 	}
+	if !(sprint.Status == "ready" || sprint.Status == "current" || sprint.Status == "finish") {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "status must be ready or current or finish",
+			"body":    nil,
+		})
+		return
+	}
 	req, _ := http.NewRequest("GET", config.WORKSPACE_SERVICE+"/workspace/exists?workspaceId="+fmt.Sprint(sprint.WorkspaceId), nil)
 	req.Header.Add("Authorization", c.GetHeader("Authorization"))
 
@@ -49,6 +56,8 @@ func CreateSprint(c *gin.Context) {
 		return
 	}
 	db.DB.Create(&sprint)
+	sprint.Order = sprint.ID
+	db.DB.Save(&sprint)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "sprint created",
 		"body":    sprint,
@@ -109,5 +118,68 @@ func DeleteSprint(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "sprint deleted",
 		"body":    sprint,
+	})
+}
+
+type Status struct {
+	Status string `form:"status"`
+}
+
+func ChangeStatus(c *gin.Context) {
+	var status Status
+	c.Bind(&status)
+	if !(status.Status == "ready" || status.Status == "current" || status.Status == "finish") {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "wrong status",
+			"body":    nil,
+		})
+		return
+	}
+	sprintId := c.Param("sprintId")
+	var sprint db.Sprint
+	err := db.DB.Where("ID = ?", sprintId).First(&sprint).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "worng sprint id",
+			"body":    nil,
+		})
+		return
+	}
+	sprint.Status = status.Status
+	db.DB.Save(&sprint)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "sprint status is updated",
+		"body":    sprint,
+	})
+}
+
+type OrderChange struct {
+	SprintIdA uint `form:"sprintA"`
+	SprintIdB uint `form:"sprintB"`
+}
+
+func ChangeOrder(c *gin.Context) {
+	var orderChange OrderChange
+	c.Bind(&orderChange)
+	var sprintA db.Sprint
+	var sprintB db.Sprint
+	errA := db.DB.Where("ID = ?", orderChange.SprintIdA).First(&sprintA).Error
+	errB := db.DB.Where("ID = ?", orderChange.SprintIdB).First(&sprintB).Error
+	if errA != nil || errB != nil || sprintA.WorkspaceId != sprintB.WorkspaceId {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "wrong sprint id",
+			"body":    nil,
+		})
+		return
+	}
+	sprintA.Order, sprintB.Order = sprintB.Order, sprintA.Order
+	db.DB.Save(&sprintA)
+	db.DB.Save(&sprintB)
+	var sprintResponse []db.Sprint
+	sprintResponse = append(sprintResponse, sprintA)
+	sprintResponse = append(sprintResponse, sprintB)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "order swap success",
+		"body":    sprintResponse,
 	})
 }

@@ -14,12 +14,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 로그 저장 미들웨어
 func Logger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		t := time.Now()
 		c.Next()
 
-		latency := time.Since(t)
+		latency := float64(time.Since(t).Microseconds()) / 1000.0
 		status := c.Writer.Status()
 		path := c.FullPath()
 		method := c.Request.Method
@@ -27,7 +28,7 @@ func Logger() gin.HandlerFunc {
 		data := url.Values{
 			"api":     {path},
 			"status":  {strconv.Itoa(status)},
-			"latency": {latency.String()},
+			"latency": {fmt.Sprint(latency)},
 			"method":  {method},
 		}
 
